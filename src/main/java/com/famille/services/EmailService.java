@@ -71,7 +71,7 @@ public class EmailService {
                 — Famille App 🏠
                 """.formatted(name, code, name, code);
 
-        message.setText(body, "UTF-8");
+        message.setContent(body, "text/plain; charset=UTF-8");
 
         // Step 4 — Send it
         Transport.send(message);

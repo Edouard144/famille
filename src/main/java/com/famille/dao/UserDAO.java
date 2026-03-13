@@ -6,24 +6,31 @@ import java.sql.*;
 
 public class UserDAO {
 
-    // Save a new user to the database during signup
-    public void createUser(User user) throws SQLException {
-        String sql = "INSERT INTO users (name, email, password_hash, phone, verified) VALUES (?, ?, ?, ?, ?)";
+    // Update createUser() in UserDAO.java to return the new user's ID
+
+    public int createUser(User user) throws SQLException {
+
+        // RETURNING id → PostgreSQL gives back the new row's ID immediately
+        String sql = "INSERT INTO users (name, email, password_hash, phone, verified) " +
+                "VALUES (?, ?, ?, ?, ?) RETURNING id";
 
         try (Connection conn = DatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getEmail());
             stmt.setString(3, user.getPasswordHash());
             stmt.setString(4, user.getPhone());
-            stmt.setBoolean(5, false); // not verified yet — OTP pending
+            stmt.setBoolean(5, false);
 
-            stmt.executeUpdate();
+            ResultSet rs = stmt.executeQuery(); // executeQuery not executeUpdate — we expect a result back
+
+            if (rs.next()) {
+                return rs.getInt("id"); // return the new user's ID
+            }
         }
+        throw new SQLException("Konti ntiyashyizweho. (User creation failed)");
     }
-
-    // Add this method to your existing UserDAO.java
 
     /**
      * Find a user by their ID.
