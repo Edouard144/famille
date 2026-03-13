@@ -43,6 +43,7 @@ public class AuthServlet extends HttpServlet {
         }
 
         switch (path) {
+            case "/save-token" -> handleSaveToken(request, response, out);
             case "/signup" -> handleSignup(request, response, out);
             case "/login"  -> handleLogin(request, response, out);
             default -> {
@@ -119,6 +120,31 @@ public class AuthServlet extends HttpServlet {
             response.setStatus(201); // 201 = Created
             out.write("{\"message\": \"Imeyili yoherejwe. Injiza kode. (Email sent. Enter code.)\", " +
                     "\"userId\": " + userId + "}");
+
+        } catch (Exception e) {
+            response.setStatus(500);
+            out.write("{\"error\": \"Ikibazo cy'uburyo. (Server error)\"}");
+            e.printStackTrace();
+        }
+    }
+
+    // Add this method to AuthServlet.java
+
+    private void handleSaveToken(HttpServletRequest request,
+                                 HttpServletResponse response,
+                                 PrintWriter out) throws IOException {
+        try {
+            // userId is already attached by AuthFilter — token was validated
+            int userId = (int) request.getAttribute("userId");
+
+            // Expected: { "fcmToken": "ExponentPushToken[xxxxx]" }
+            JsonObject body = JsonParser.parseReader(request.getReader()).getAsJsonObject();
+            String expoToken = body.get("fcmToken").getAsString().trim();
+
+            userDAO.updateFcmToken(userId, expoToken);
+
+            response.setStatus(200);
+            out.write("{\"message\": \"Token yabitswe. (Token saved)\"}");
 
         } catch (Exception e) {
             response.setStatus(500);
