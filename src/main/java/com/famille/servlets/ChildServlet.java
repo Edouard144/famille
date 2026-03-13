@@ -51,6 +51,9 @@ public class ChildServlet extends HttpServlet {
             child.setGender(body.get("gender").getAsString());
 
             int newId = childDAO.createChild(child);
+            VaccinationDAO vaccinationDAO = new VaccinationDAO();
+            vaccinationDAO.generateSchedule(newId, child.getBirthDate()); // auto-build schedule
+
             child.setId(newId);
 
             response.setStatus(201);
