@@ -71,6 +71,13 @@
         <version>0.4</version>
     </dependency>
 
+        <!-- Twilio SDK — for sending SMS messages -->
+        <dependency>
+            <groupId>com.twilio.sdk</groupId>
+            <artifactId>twilio</artifactId>
+            <version>9.14.0</version>
+        </dependency>
+
 </dependencies>
 
 </project>

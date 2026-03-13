@@ -6,6 +6,21 @@ import java.sql.*;
 
 public class UserDAO {
 
+    // Add to UserDAO.java
+
+    /** Save the FCM device token when a user logs in on their phone. */
+    public void updateFcmToken(int userId, String token) throws SQLException {
+        String sql = "UPDATE users SET fcm_token = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, token);
+            stmt.setInt(2, userId);
+            stmt.executeUpdate();
+        }
+    }
+
     // Update createUser() in UserDAO.java to return the new user's ID
 
     public int createUser(User user) throws SQLException {
