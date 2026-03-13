@@ -19,7 +19,7 @@ public class AuthFilter implements Filter {
             throws IOException, ServletException {
 
         // Cast to HTTP versions so we can read headers
-        HttpServletRequest  httpReq  = (HttpServletRequest)  request;
+        HttpServletRequest httpReq = (HttpServletRequest) request;
         HttpServletResponse httpResp = (HttpServletResponse) response;
 
         // Always return JSON, even for errors
@@ -62,6 +62,9 @@ public class AuthFilter implements Filter {
         } catch (JwtException e) {
             // Token exists but is invalid, expired, or tampered with
             sendError(httpResp, 401, "Uruhushya rwawe rwarangiye cyangwa si rwe. (Invalid or expired token)");
+        } catch (Exception e) {
+            // Handle any unexpected errors
+            sendError(httpResp, 500, "Internal server error");
         }
     }
 
