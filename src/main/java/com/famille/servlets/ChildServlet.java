@@ -2,6 +2,7 @@ package com.famille.servlets;
 
 import com.famille.dao.ChildDAO;
 import com.famille.dao.FamilyDAO;
+import com.famille.dao.VaccinationDAO;
 import com.famille.models.Child;
 import com.google.gson.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,7 +16,7 @@ import java.util.List;
 @WebServlet("/api/children/*")
 public class ChildServlet extends HttpServlet {
 
-    private final ChildDAO  childDAO  = new ChildDAO();
+    private final ChildDAO childDAO = new ChildDAO();
     private final FamilyDAO familyDAO = new FamilyDAO();
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class,
@@ -40,11 +41,20 @@ public class ChildServlet extends HttpServlet {
 
             // Read child data from request body
             // Expected: { "name":"Kalisa", "birthDate":"2022-03-15",
-            //             "bloodType":"A+", "gender":"Male" }
+            // "bloodType":"A+", "gender":"Male" }
             JsonObject body = JsonParser.parseReader(request.getReader()).getAsJsonObject();
 
             Child child = new Child();
             child.setFamilyId(familyId);
+
+            // Validate required fields
+            if (body.get("name") == null || body.get("birthDate") == null ||
+                    body.get("bloodType") == null || body.get("gender") == null) {
+                response.setStatus(400);
+                out.write("{\"error\": \"Missing required fields\"}");
+                return;
+            }
+
             child.setName(body.get("name").getAsString().trim());
             child.setBirthDate(LocalDate.parse(body.get("birthDate").getAsString()));
             child.setBloodType(body.get("bloodType").getAsString());
@@ -75,7 +85,7 @@ public class ChildServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         try {
-            int userId   = (int) request.getAttribute("userId");
+            int userId = (int) request.getAttribute("userId");
             int familyId = familyDAO.getFamilyIdByUserId(userId);
 
             List<Child> children = childDAO.getChildrenByFamily(familyId);
@@ -101,9 +111,22 @@ public class ChildServlet extends HttpServlet {
         try {
             // Extract child ID from URL: /api/children/3 → "3"
             String pathInfo = request.getPathInfo(); // "/3"
+            if (pathInfo == null || pathInfo.isEmpty()) {
+                response.setStatus(400);
+                out.write("{\"error\": \"Child ID required\"}");
+                return;
+            }
             int childId = Integer.parseInt(pathInfo.substring(1));
 
             JsonObject body = JsonParser.parseReader(request.getReader()).getAsJsonObject();
+
+            // Validate required fields
+            if (body.get("name") == null || body.get("birthDate") == null ||
+                    body.get("bloodType") == null || body.get("gender") == null) {
+                response.setStatus(400);
+                out.write("{\"error\": \"Missing required fields\"}");
+                return;
+            }
 
             Child child = new Child();
             child.setId(childId);
